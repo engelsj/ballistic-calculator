@@ -8,9 +8,13 @@ description = "A ballistic calculator for target shooting"
 [dependencies]
 thiserror = "1.0"
 serde = { version = "1.0", features = ["derive"] }
+winapi = { version = "0.3", features = ["winuser"] }
 nalgebra = "0.32"
 uom = "0.35"
 float-cmp = "0.9"
+eframe = "0.24.0"
+egui = "0.24.0"
+egui_plot = "0.24.0"
 
 [dev-dependencies]
 approx = "0.5"
