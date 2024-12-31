@@ -1,0 +1,17 @@
+[package]
+name = "ballistic_calculator"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A ballistic calculator for target shooting"
+
+[dependencies]
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+nalgebra = "0.32"
+uom = "0.35"
+float-cmp = "0.9"
+
+[dev-dependencies]
+approx = "0.5"
+criterion = "0.4"
