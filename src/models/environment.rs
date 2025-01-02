@@ -46,11 +46,18 @@ impl Environment {
 
     pub fn air_density(&self) -> f64 {
         let temp_r = self.temperature + 459.67;  // Convert to Rankine
-        let pressure_mb = self.pressure * 33.8639;  // Convert inHg to millibars
-        let vapor_pressure = self.calculate_vapor_pressure();
+        let standard_pressure = 29.92;  // inHg
+        let standard_temp = 518.67;  // Rankine
         
-        // Density formula from: http://www.shootingsoftware.com/atmospheric.htm
-        (pressure_mb - (0.3783 * vapor_pressure)) / (1718.0 * (temp_r / 518.67))
+        // Corrected density formula for imperial units
+        let density = self.pressure / standard_pressure * standard_temp / temp_r * 0.0751;  // lb/ft³
+        
+        // Apply humidity correction
+        let water_vapor_pressure = self.calculate_vapor_pressure();
+        let dry_air_pressure = self.pressure - water_vapor_pressure;
+        let correction_factor = (dry_air_pressure + 0.3783 * water_vapor_pressure) / self.pressure;
+        
+        density * correction_factor
     }
 
     fn calculate_vapor_pressure(&self) -> f64 {

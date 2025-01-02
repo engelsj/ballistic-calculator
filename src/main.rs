@@ -1,13 +1,10 @@
 use eframe::egui;
-use eframe::egui::ViewportBuilder;
 use ballistic_calculator::{
     Projectile,
     Environment,
     TrajectoryCalculator,
-    TrajectoryPoint,
     G1DragModel,
     G7DragModel,
-    DragModel,
 };
 
 struct BallisticCalculatorApp {
@@ -186,48 +183,30 @@ impl BallisticCalculatorApp {
             s.parse::<f64>().map_err(|_| format!("Invalid {} value", field))
         };
 
-        let result = (|| -> Result<Vec<TrajectoryPoint>, String> {
-            // Parse projectile data
-            let projectile_weight = parse_input(&self.projectile_weight, "projectile weight")?;
-            let ballistic_coefficient = parse_input(&self.ballistic_coefficient, "ballistic coefficient")?;
-            let muzzle_velocity = parse_input(&self.muzzle_velocity, "muzzle velocity")?;
-            let caliber = parse_input(&self.caliber, "caliber")?;
-            let bullet_length = parse_input(&self.bullet_length, "bullet length")?;
-            
+        let result: Result<_, String> = try {
             let projectile = Projectile::new(
-                projectile_weight,
-                ballistic_coefficient,
-                muzzle_velocity,
-                caliber,
-                bullet_length,
+                parse_input(&self.projectile_weight, "projectile weight")?,
+                parse_input(&self.ballistic_coefficient, "ballistic coefficient")?,
+                parse_input(&self.muzzle_velocity, "muzzle velocity")?,
+                parse_input(&self.caliber, "caliber")?,
+                parse_input(&self.bullet_length, "bullet length")?,
             ).map_err(|e| e.to_string())?;
 
-            // Parse environmental data
-            let temperature = parse_input(&self.temperature, "temperature")?;
-            let pressure = parse_input(&self.pressure, "pressure")?;
-            let humidity = parse_input(&self.humidity, "humidity")?;
-            let wind_speed = parse_input(&self.wind_speed, "wind speed")?;
-            let wind_angle = parse_input(&self.wind_angle, "wind angle")?;
-            let altitude = parse_input(&self.altitude, "altitude")?;
-            let latitude = parse_input(&self.latitude, "latitude")?;
-            
             let environment = Environment::new(
-                temperature,
-                pressure,
-                humidity,
-                wind_speed,
-                wind_angle,
-                altitude,
-                latitude,
+                parse_input(&self.temperature, "temperature")?,
+                parse_input(&self.pressure, "pressure")?,
+                parse_input(&self.humidity, "humidity")?,
+                parse_input(&self.wind_speed, "wind speed")?,
+                parse_input(&self.wind_angle, "wind angle")?,
+                parse_input(&self.altitude, "altitude")?,
+                parse_input(&self.latitude, "latitude")?,
             ).map_err(|e| e.to_string())?;
 
-            // Create drag model
             let drag_model: Box<dyn DragModel> = match self.drag_model {
                 DragModelType::G1 => Box::new(G1DragModel),
                 DragModelType::G7 => Box::new(G7DragModel),
             };
 
-            // Create calculator and compute trajectory
             let calculator = TrajectoryCalculator::new(
                 projectile,
                 environment,
@@ -235,8 +214,8 @@ impl BallisticCalculatorApp {
             );
 
             let range = parse_input(&self.range, "range")?;
-            Ok(calculator.calculate_trajectory(range, 0.01))
-        })();
+            calculator.calculate_trajectory(range, 0.01)
+        };
 
         match result {
             Ok(trajectory) => {
@@ -253,9 +232,7 @@ impl BallisticCalculatorApp {
 
 fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
-        viewport: ViewportBuilder::default()
-            .with_inner_size([1200.0, 800.0])
-            .with_title("Ballistic Calculator"),
+        initial_window_size: Some(egui::vec2(1200.0, 800.0)),
         ..Default::default()
     };
     
@@ -264,4 +241,47 @@ fn main() -> Result<(), eframe::Error> {
         options,
         Box::new(|_cc| Box::new(BallisticCalculatorApp::default())),
     )
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let projectile = Projectile::new(
+        168.0,  // 168 grain
+        0.223,  // G1 BC
+        2750.0, // 2750 fps muzzle velocity
+        0.308,  // .308 caliber
+        1.2,    // 1.2 inch length
+    )?;
+
+    let environment = Environment::new(
+        59.0,   // 59°F
+        29.92,  // 29.92 inHg pressure
+        78.0,   // 78% humidity
+        10.0,   // 10 mph wind
+        90.0,   // 90° wind angle (full value)
+        1000.0, // 1000 ft altitude
+        45.0,   // 45° latitude
+    )?;
+
+    let calculator = TrajectoryCalculator::new(
+        projectile,
+        environment,
+        Box::new(G1DragModel)
+    );
+
+    let trajectory = calculator.calculate_trajectory(1000.0, 0.01);
+    
+    // Print results
+    for point in trajectory.iter().step_by(100) {
+        println!(
+            "Distance: {:.1} yards, Drop: {:.1} inches, Windage: {:.1} inches, \
+             Velocity: {:.0} fps, Time: {:.3} sec",
+            point.distance,
+            point.drop,
+            point.windage,
+            point.velocity,
+            point.time
+        );
+    }
+
+    Ok(())
 }
