@@ -4,11 +4,11 @@ use crate::utils::conversions;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Projectile {
-    weight_grains: f64,
-    ballistic_coefficient: f64,
-    muzzle_velocity: f64,
-    caliber: f64,
-    length: f64,
+    pub weight_grains: f64,
+    pub ballistic_coefficient: f64,
+    pub muzzle_velocity: f64,
+    pub caliber: f64,
+    pub length: f64,
 }
 
 impl Projectile {

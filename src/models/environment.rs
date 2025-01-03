@@ -3,13 +3,13 @@ use thiserror::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Environment {
-    temperature: f64,    // Fahrenheit
-    pressure: f64,       // inHg
-    humidity: f64,       // %
-    wind_speed: f64,     // mph
-    wind_angle: f64,     // degrees
-    altitude: f64,       // feet
-    latitude: f64,       // degrees
+    pub temperature: f64,    // Fahrenheit
+    pub pressure: f64,       // inHg
+    pub humidity: f64,       // %
+    pub wind_speed: f64,     // mph
+    pub wind_angle: f64,     // degrees
+    pub altitude: f64,       // feet
+    pub latitude: f64,       // degrees
 }
 
 impl Environment {

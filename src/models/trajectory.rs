@@ -1,5 +1,4 @@
 use serde::{Serialize, Deserialize};
-use nalgebra as na;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrajectoryPoint {

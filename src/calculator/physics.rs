@@ -1,7 +1,5 @@
 use crate::models::{Projectile, Environment, TrajectoryPoint};
 use crate::calculator::drag::DragModel;
-use nalgebra as na;
-
 pub struct TrajectoryCalculator {
     projectile: Projectile,
     environment: Environment,
@@ -52,7 +50,11 @@ impl TrajectoryCalculator {
 
             // Calculate drag force
             let air_density = self.environment.air_density();
-            let drag = self.drag_model.calculate_drag(v_total, air_density);
+            let drag = self.drag_model.calculate_drag(
+                v_total, 
+                air_density, 
+                self.projectile.ballistic_coefficient
+            );
             
             // Calculate acceleration components
             let ax = -(drag * v_rel_x) / (v_total * self.projectile.weight_grains);
